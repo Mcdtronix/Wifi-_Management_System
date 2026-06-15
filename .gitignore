@@ -74,10 +74,10 @@ db.sqlite3-journal
 media/
 staticfiles/
 
-# # Virtual Environment
-# venv/
-# env/
-# ENV/
+## Virtual Environment
+venv/
+env/
+ENV/
 
 # IDE
 .idea/

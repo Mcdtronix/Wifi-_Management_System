@@ -451,6 +451,8 @@ class SubscriberPublicAuthViewSet(ViewSet):
 
         mac_address = serializer.validated_data.get("mac_address", "").strip().upper().replace("-", ":")
         device_name = serializer.validated_data.get("device_name", "").strip()
+        browser_fingerprint = serializer.validated_data.get("browser_fingerprint", "").strip()
+        user_agent = serializer.validated_data.get("user_agent", "").strip()
 
         if mac_address:
             from apps.devices.models import Device
@@ -471,7 +473,9 @@ class SubscriberPublicAuthViewSet(ViewSet):
                         mac_address=mac_address,
                         device_name=device_name or "Unknown Device",
                         is_primary=True,
-                        status=Device.DeviceStatus.ACTIVE
+                        status=Device.DeviceStatus.ACTIVE,
+                        browser_fingerprint=browser_fingerprint,
+                        user_agent=user_agent
                     )
                 except IntegrityError:
                     return Response(
@@ -488,6 +492,18 @@ class SubscriberPublicAuthViewSet(ViewSet):
                         {"detail": "This device is not registered to your account. Please submit a Device Change Request."},
                         status=status.HTTP_401_UNAUTHORIZED,
                     )
+                
+                # Prevent MAC Spoofing by verifying browser fingerprint
+                if active_device.browser_fingerprint and browser_fingerprint and active_device.browser_fingerprint != browser_fingerprint:
+                    return Response(
+                        {"detail": "Device identity mismatch. Potential MAC spoofing detected. Please submit a Device Change Request."},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                
+                # Update user_agent if it changes over time to keep history fresh
+                if user_agent and active_device.user_agent != user_agent:
+                    active_device.user_agent = user_agent
+                    active_device.save(update_fields=['user_agent', 'updated_at'])
 
         # Generate tokens and inject custom user_type
         refresh = RefreshToken.for_user(subscriber)

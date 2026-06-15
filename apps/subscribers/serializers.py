@@ -226,3 +226,5 @@ class SubscriberLoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     mac_address = serializers.CharField(max_length=17, required=False, allow_blank=True)
     device_name = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    browser_fingerprint = serializers.CharField(max_length=64, required=False, allow_blank=True)
+    user_agent = serializers.CharField(required=False, allow_blank=True)

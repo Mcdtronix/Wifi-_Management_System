@@ -49,6 +49,16 @@ class Device(BaseModel):
         verbose_name=_("Device Name"),
         help_text=_("Optional label, e.g. 'Samsung Galaxy A54'."),
     )
+    browser_fingerprint = models.CharField(
+        max_length=64,
+        blank=True,
+        verbose_name=_("Browser Fingerprint"),
+        help_text=_("Hash to prevent MAC spoofing."),
+    )
+    user_agent = models.TextField(
+        blank=True,
+        verbose_name=_("User Agent"),
+    )
     status = models.CharField(
         max_length=20,
         choices=DeviceStatus.choices,

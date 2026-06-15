@@ -77,11 +77,20 @@ function LoginPage() {
           password: values.password,
         });
       } else {
+        // Capture browser fingerprint for device binding to prevent MAC spoofing
+        const fpjs = await import('@fingerprintjs/fingerprintjs');
+        const fp = await fpjs.load();
+        const fpResult = await fp.get();
+        const browserFingerprint = fpResult.visitorId;
+        const userAgent = navigator.userAgent;
+
         data = await Api.auth.subscriberLogin({
           username: values.username,
           password: values.password,
           mac_address: macAddress,
           device_name: getDeviceName(),
+          browser_fingerprint: browserFingerprint,
+          user_agent: userAgent,
         });
       }
       
